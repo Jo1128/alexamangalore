@@ -5,6 +5,25 @@ var moment = require('moment');
 var weather1 = require('weather-js');
 const uuid = require('uuid');
 
+
+
+//Mongo Params
+var mongoose = require('mongoose');
+var mongoURL = 'mongodb+srv://jyothi:1234@cluster0-hygoz.mongodb.net/test?retryWrites=true&w=majority';
+
+//Models
+var alexaLog = require('../models/alexaLog');
+//Mongo DB connect
+mongoose.connect(mongoURL, { useNewUrlParser: true }, function (err, connect) {
+  if (err) {
+    console.log("Mongodb not Connected");
+  } else {
+    console.log("Mongodb Connected");
+
+  }
+});
+
+
 module.exports = {
   weather
 };
@@ -38,7 +57,34 @@ response.titleText = "Update For Mangalore Weather";
     response.redirectionUrl = "http://jyothimoily.xyz";
     response.mainText = "Hello from weather. Todays weather in Mangalore is expected to be " + day0weather + ".Tomorrows weather will be " +day1weather + ".third day weather will be " + day2weather + " . fourth day weather will be " + day3weather + "fifth day weather will be " + day4weather;
     res.json(response);
+    var input="Alexa Whats the weather?";
+    var output= response.mainText;
+    var timestmp=moment();
+    var dd=moment().format("DD");
+    var mm=moment().format("MM");
+    var yyyy=moment().format("YYYY");
+    saveDataInMongo(input, output, timestmp,dd,mm,yyyy)
     }
    
   });
+}
+
+
+
+function saveDataInMongo(input, output, timestmp,dd,mm,yyyy) {
+  var alexaLogObj = new alexaLog({
+    input: input,
+    output: output,
+    timestmp: timestmp,
+    dd:dd,
+    mm:mm,
+    yyyy:yyyy
+  });
+  alexaLogObj.save(function (error) {
+    if (error) {
+      console.error("Error in Saving Data->" + error);
+    }
+    else {
+    }
+  })
 }
